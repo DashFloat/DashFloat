@@ -1,5 +1,7 @@
 # DashFloat
 
+[![gh-actions](https://github.com/DashFloat/DashFloat/workflows/CI/badge.svg)](https://github.com/DashFloat/DashFloat/actions?workflow=CI)
+
 To start your Phoenix server:
 
   * Run `mix setup` to install and setup dependencies
