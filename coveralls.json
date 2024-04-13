@@ -1,0 +1,15 @@
+{
+  "skip_files": [
+    "lib/dash_float.ex",
+    "lib/dash_float/application.ex",
+    "lib/dash_float/repo.ex",
+    "lib/dash_float_web.ex",
+    "lib/dash_float_web/components/core_components.ex",
+    "lib/dash_float_web/components/layouts.ex",
+    "lib/dash_float_web/endpoint.ex",
+    "lib/dash_float_web/gettext.ex",
+    "lib/dash_float_web/router.ex",
+    "lib/dash_float_web/telemetry.ex",
+    "test"
+  ]
+}
