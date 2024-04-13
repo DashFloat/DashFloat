@@ -1,5 +1,5 @@
 defmodule DashFloatWeb.PageControllerTest do
-  use DashFloatWeb.ConnCase
+  use DashFloatWeb.ConnCase, async: true
 
   test "GET /", %{conn: conn} do
     conn = get(conn, ~p"/")
