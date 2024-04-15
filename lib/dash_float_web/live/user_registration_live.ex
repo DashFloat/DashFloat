@@ -2,7 +2,7 @@ defmodule DashFloatWeb.UserRegistrationLive do
   use DashFloatWeb, :live_view
 
   alias DashFloat.Identity
-  alias DashFloat.Identity.User
+  alias DashFloat.Identity.Schemas.User
 
   def render(assigns) do
     ~H"""

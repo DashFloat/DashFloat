@@ -4,9 +4,11 @@ defmodule DashFloat.Identity do
   """
 
   import Ecto.Query, warn: false
-  alias DashFloat.Repo
 
-  alias DashFloat.Identity.{User, UserToken, UserNotifier}
+  alias DashFloat.Identity.Schemas.User
+  alias DashFloat.Identity.Schemas.UserToken
+  alias DashFloat.Identity.UserNotifier
+  alias DashFloat.Repo
 
   ## Database getters
 

@@ -4,7 +4,8 @@ defmodule DashFloatWeb.UserConfirmationInstructionsLiveTest do
   import Phoenix.LiveViewTest
   import DashFloat.IdentityFixtures
 
-  alias DashFloat.Identity
+  alias DashFloat.Identity.Schemas.User
+  alias DashFloat.Identity.Schemas.UserToken
   alias DashFloat.Repo
 
   setup do
@@ -29,11 +30,11 @@ defmodule DashFloatWeb.UserConfirmationInstructionsLiveTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
                "If your email is in our system"
 
-      assert Repo.get_by!(Identity.UserToken, user_id: user.id).context == "confirm"
+      assert Repo.get_by!(UserToken, user_id: user.id).context == "confirm"
     end
 
     test "does not send confirmation token if user is confirmed", %{conn: conn, user: user} do
-      Repo.update!(Identity.User.confirm_changeset(user))
+      Repo.update!(User.confirm_changeset(user))
 
       {:ok, lv, _html} = live(conn, ~p"/users/confirm")
 
@@ -46,7 +47,7 @@ defmodule DashFloatWeb.UserConfirmationInstructionsLiveTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
                "If your email is in our system"
 
-      refute Repo.get_by(Identity.UserToken, user_id: user.id)
+      refute Repo.get_by(UserToken, user_id: user.id)
     end
 
     test "does not send confirmation token if email is invalid", %{conn: conn} do
@@ -61,7 +62,7 @@ defmodule DashFloatWeb.UserConfirmationInstructionsLiveTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
                "If your email is in our system"
 
-      assert Repo.all(Identity.UserToken) == []
+      assert Repo.all(UserToken) == []
     end
   end
 end

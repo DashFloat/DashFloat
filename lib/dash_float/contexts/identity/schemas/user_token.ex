@@ -1,7 +1,10 @@
-defmodule DashFloat.Identity.UserToken do
+defmodule DashFloat.Identity.Schemas.UserToken do
   use Ecto.Schema
+
   import Ecto.Query
-  alias DashFloat.Identity.UserToken
+
+  alias __MODULE__
+  alias DashFloat.Identity.Schemas.User
 
   @hash_algorithm :sha256
   @rand_size 32
@@ -17,7 +20,7 @@ defmodule DashFloat.Identity.UserToken do
     field :token, :binary
     field :context, :string
     field :sent_to, :string
-    belongs_to :user, DashFloat.Identity.User
+    belongs_to :user, User
 
     timestamps(updated_at: false)
   end
