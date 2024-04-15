@@ -47,6 +47,7 @@ defmodule DashFloat.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:bcrypt_elixir, "~> 3.0"},
       {:bandit, "1.4.2"},
       {:credo, "1.7.5", only: [:dev, :test], runtime: false},
       {:dialyxir, "1.4.3", only: [:dev, :test], runtime: false},
