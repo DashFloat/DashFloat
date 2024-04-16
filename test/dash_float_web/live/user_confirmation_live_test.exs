@@ -1,15 +1,16 @@
 defmodule DashFloatWeb.UserConfirmationLiveTest do
   use DashFloatWeb.ConnCase, async: true
 
+  import DashFloat.Factories.IdentityFactory
   import Phoenix.LiveViewTest
-  import DashFloat.IdentityFixtures
 
   alias DashFloat.Identity
   alias DashFloat.Identity.Schemas.UserToken
   alias DashFloat.Repo
+  alias DashFloat.TestHelpers.IdentityHelper
 
   setup do
-    %{user: user_fixture()}
+    %{user: insert(:user)}
   end
 
   describe "Confirm user" do
@@ -20,7 +21,7 @@ defmodule DashFloatWeb.UserConfirmationLiveTest do
 
     test "confirms the given token once", %{conn: conn, user: user} do
       token =
-        extract_user_token(fn url ->
+        IdentityHelper.extract_user_token(fn url ->
           Identity.deliver_user_confirmation_instructions(user, url)
         end)
 

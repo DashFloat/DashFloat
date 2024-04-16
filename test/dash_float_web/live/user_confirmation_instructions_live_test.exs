@@ -1,15 +1,15 @@
 defmodule DashFloatWeb.UserConfirmationInstructionsLiveTest do
   use DashFloatWeb.ConnCase, async: true
 
+  import DashFloat.Factories.IdentityFactory
   import Phoenix.LiveViewTest
-  import DashFloat.IdentityFixtures
 
   alias DashFloat.Identity.Schemas.User
   alias DashFloat.Identity.Schemas.UserToken
   alias DashFloat.Repo
 
   setup do
-    %{user: user_fixture()}
+    %{user: insert(:user)}
   end
 
   describe "Resend confirmation" do

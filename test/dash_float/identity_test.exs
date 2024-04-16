@@ -1,11 +1,12 @@
 defmodule DashFloat.IdentityTest do
   use DashFloat.DataCase
 
-  import DashFloat.IdentityFixtures
+  import DashFloat.Factories.IdentityFactory
 
   alias DashFloat.Identity
   alias DashFloat.Identity.Schemas.User
   alias DashFloat.Identity.Schemas.UserToken
+  alias DashFloat.TestHelpers.IdentityHelper
 
   describe "get_user_by_email/1" do
     test "does not return the user if the email does not exist" do
@@ -13,7 +14,7 @@ defmodule DashFloat.IdentityTest do
     end
 
     test "returns the user if the email exists" do
-      %{id: id} = user = user_fixture()
+      %{id: id} = user = insert(:user)
       assert %User{id: ^id} = Identity.get_user_by_email(user.email)
     end
   end
@@ -24,15 +25,16 @@ defmodule DashFloat.IdentityTest do
     end
 
     test "does not return the user if the password is not valid" do
-      user = user_fixture()
+      user = insert(:user)
       refute Identity.get_user_by_email_and_password(user.email, "invalid")
     end
 
     test "returns the user if the email and password are valid" do
-      %{id: id} = user = user_fixture()
+      password = "totally valid password"
+      %{id: id} = user = insert(:user, %{password: password})
 
       assert %User{id: ^id} =
-               Identity.get_user_by_email_and_password(user.email, valid_user_password())
+               Identity.get_user_by_email_and_password(user.email, password)
     end
   end
 
@@ -44,7 +46,7 @@ defmodule DashFloat.IdentityTest do
     end
 
     test "returns the user with the given id" do
-      %{id: id} = user = user_fixture()
+      %{id: id} = user = insert(:user)
       assert %User{id: ^id} = Identity.get_user!(user.id)
     end
   end
@@ -76,7 +78,7 @@ defmodule DashFloat.IdentityTest do
     end
 
     test "validates email uniqueness" do
-      %{email: email} = user_fixture()
+      %{email: email} = insert(:user)
       {:error, changeset} = Identity.register_user(%{email: email})
       assert "has already been taken" in errors_on(changeset).email
 
@@ -86,8 +88,8 @@ defmodule DashFloat.IdentityTest do
     end
 
     test "registers users with a hashed password" do
-      email = unique_user_email()
-      {:ok, user} = Identity.register_user(valid_user_attributes(email: email))
+      email = Faker.Internet.email()
+      {:ok, user} = Identity.register_user(%{email: email, password: "some password"})
       assert user.email == email
       assert is_binary(user.hashed_password)
       assert is_nil(user.confirmed_at)
@@ -102,13 +104,13 @@ defmodule DashFloat.IdentityTest do
     end
 
     test "allows fields to be set" do
-      email = unique_user_email()
-      password = valid_user_password()
+      email = Faker.Internet.email()
+      password = "valid password"
 
       changeset =
         Identity.change_user_registration(
           %User{},
-          valid_user_attributes(email: email, password: password)
+          %{email: email, password: password}
         )
 
       assert changeset.valid?
@@ -127,33 +129,34 @@ defmodule DashFloat.IdentityTest do
 
   describe "apply_user_email/3" do
     setup do
-      %{user: user_fixture()}
+      password = "totally valid password"
+      user = insert(:user, %{password: password})
+      %{user: user, password: password}
     end
 
-    test "requires email to change", %{user: user} do
-      {:error, changeset} = Identity.apply_user_email(user, valid_user_password(), %{})
+    test "requires email to change", %{user: user, password: password} do
+      {:error, changeset} = Identity.apply_user_email(user, password, %{})
       assert %{email: ["did not change"]} = errors_on(changeset)
     end
 
-    test "validates email", %{user: user} do
+    test "validates email", %{user: user, password: password} do
       {:error, changeset} =
-        Identity.apply_user_email(user, valid_user_password(), %{email: "not valid"})
+        Identity.apply_user_email(user, password, %{email: "not valid"})
 
       assert %{email: ["must have the @ sign and no spaces"]} = errors_on(changeset)
     end
 
-    test "validates maximum value for email for security", %{user: user} do
+    test "validates maximum value for email for security", %{user: user, password: password} do
       too_long = String.duplicate("db", 100)
 
       {:error, changeset} =
-        Identity.apply_user_email(user, valid_user_password(), %{email: too_long})
+        Identity.apply_user_email(user, password, %{email: too_long})
 
       assert "should be at most 160 character(s)" in errors_on(changeset).email
     end
 
-    test "validates email uniqueness", %{user: user} do
-      %{email: email} = user_fixture()
-      password = valid_user_password()
+    test "validates email uniqueness", %{user: user, password: password} do
+      %{email: email} = insert(:user)
 
       {:error, changeset} = Identity.apply_user_email(user, password, %{email: email})
 
@@ -162,14 +165,14 @@ defmodule DashFloat.IdentityTest do
 
     test "validates current password", %{user: user} do
       {:error, changeset} =
-        Identity.apply_user_email(user, "invalid", %{email: unique_user_email()})
+        Identity.apply_user_email(user, "invalid", %{email: Faker.Internet.email()})
 
       assert %{current_password: ["is not valid"]} = errors_on(changeset)
     end
 
-    test "applies the email without persisting it", %{user: user} do
-      email = unique_user_email()
-      {:ok, user} = Identity.apply_user_email(user, valid_user_password(), %{email: email})
+    test "applies the email without persisting it", %{user: user, password: password} do
+      email = Faker.Internet.email()
+      {:ok, user} = Identity.apply_user_email(user, password, %{email: email})
       assert user.email == email
       assert Identity.get_user!(user.id).email != email
     end
@@ -177,12 +180,12 @@ defmodule DashFloat.IdentityTest do
 
   describe "deliver_user_update_email_instructions/3" do
     setup do
-      %{user: user_fixture()}
+      %{user: insert(:user)}
     end
 
     test "sends token through notification", %{user: user} do
       token =
-        extract_user_token(fn url ->
+        IdentityHelper.extract_user_token(fn url ->
           Identity.deliver_user_update_email_instructions(user, "current@example.com", url)
         end)
 
@@ -196,11 +199,11 @@ defmodule DashFloat.IdentityTest do
 
   describe "update_user_email/2" do
     setup do
-      user = user_fixture()
-      email = unique_user_email()
+      user = insert(:user)
+      email = Faker.Internet.email()
 
       token =
-        extract_user_token(fn url ->
+        IdentityHelper.extract_user_token(fn url ->
           Identity.deliver_user_update_email_instructions(%{user | email: email}, user.email, url)
         end)
 
@@ -257,12 +260,15 @@ defmodule DashFloat.IdentityTest do
 
   describe "update_user_password/3" do
     setup do
-      %{user: user_fixture()}
+      password = "totally valid password"
+      user = insert(:user, %{password: password})
+
+      %{user: user, password: password}
     end
 
-    test "validates password", %{user: user} do
+    test "validates password", %{user: user, password: password} do
       {:error, changeset} =
-        Identity.update_user_password(user, valid_user_password(), %{
+        Identity.update_user_password(user, password, %{
           password: "not valid",
           password_confirmation: "another"
         })
@@ -273,25 +279,25 @@ defmodule DashFloat.IdentityTest do
              } = errors_on(changeset)
     end
 
-    test "validates maximum values for password for security", %{user: user} do
+    test "validates maximum values for password for security", %{user: user, password: password} do
       too_long = String.duplicate("db", 100)
 
       {:error, changeset} =
-        Identity.update_user_password(user, valid_user_password(), %{password: too_long})
+        Identity.update_user_password(user, password, %{password: too_long})
 
       assert "should be at most 72 character(s)" in errors_on(changeset).password
     end
 
     test "validates current password", %{user: user} do
       {:error, changeset} =
-        Identity.update_user_password(user, "invalid", %{password: valid_user_password()})
+        Identity.update_user_password(user, "invalid", %{password: "valid password"})
 
       assert %{current_password: ["is not valid"]} = errors_on(changeset)
     end
 
-    test "updates the password", %{user: user} do
+    test "updates the password", %{user: user, password: password} do
       {:ok, user} =
-        Identity.update_user_password(user, valid_user_password(), %{
+        Identity.update_user_password(user, password, %{
           password: "new valid password"
         })
 
@@ -299,11 +305,11 @@ defmodule DashFloat.IdentityTest do
       assert Identity.get_user_by_email_and_password(user.email, "new valid password")
     end
 
-    test "deletes all tokens for the given user", %{user: user} do
+    test "deletes all tokens for the given user", %{user: user, password: password} do
       _ = Identity.generate_user_session_token(user)
 
       {:ok, _} =
-        Identity.update_user_password(user, valid_user_password(), %{
+        Identity.update_user_password(user, password, %{
           password: "new valid password"
         })
 
@@ -313,7 +319,7 @@ defmodule DashFloat.IdentityTest do
 
   describe "generate_user_session_token/1" do
     setup do
-      %{user: user_fixture()}
+      %{user: insert(:user)}
     end
 
     test "generates a token", %{user: user} do
@@ -325,7 +331,7 @@ defmodule DashFloat.IdentityTest do
       assert_raise Ecto.ConstraintError, fn ->
         Repo.insert!(%UserToken{
           token: user_token.token,
-          user_id: user_fixture().id,
+          user_id: insert(:user).id,
           context: "session"
         })
       end
@@ -334,7 +340,7 @@ defmodule DashFloat.IdentityTest do
 
   describe "get_user_by_session_token/1" do
     setup do
-      user = user_fixture()
+      user = insert(:user)
       token = Identity.generate_user_session_token(user)
       %{user: user, token: token}
     end
@@ -356,7 +362,7 @@ defmodule DashFloat.IdentityTest do
 
   describe "delete_user_session_token/1" do
     test "deletes the token" do
-      user = user_fixture()
+      user = insert(:user)
       token = Identity.generate_user_session_token(user)
       assert Identity.delete_user_session_token(token) == :ok
       refute Identity.get_user_by_session_token(token)
@@ -365,12 +371,12 @@ defmodule DashFloat.IdentityTest do
 
   describe "deliver_user_confirmation_instructions/2" do
     setup do
-      %{user: user_fixture()}
+      %{user: insert(:user)}
     end
 
     test "sends token through notification", %{user: user} do
       token =
-        extract_user_token(fn url ->
+        IdentityHelper.extract_user_token(fn url ->
           Identity.deliver_user_confirmation_instructions(user, url)
         end)
 
@@ -384,10 +390,10 @@ defmodule DashFloat.IdentityTest do
 
   describe "confirm_user/1" do
     setup do
-      user = user_fixture()
+      user = insert(:user)
 
       token =
-        extract_user_token(fn url ->
+        IdentityHelper.extract_user_token(fn url ->
           Identity.deliver_user_confirmation_instructions(user, url)
         end)
 
@@ -418,12 +424,12 @@ defmodule DashFloat.IdentityTest do
 
   describe "deliver_user_reset_password_instructions/2" do
     setup do
-      %{user: user_fixture()}
+      %{user: insert(:user)}
     end
 
     test "sends token through notification", %{user: user} do
       token =
-        extract_user_token(fn url ->
+        IdentityHelper.extract_user_token(fn url ->
           Identity.deliver_user_reset_password_instructions(user, url)
         end)
 
@@ -437,10 +443,10 @@ defmodule DashFloat.IdentityTest do
 
   describe "get_user_by_reset_password_token/1" do
     setup do
-      user = user_fixture()
+      user = insert(:user)
 
       token =
-        extract_user_token(fn url ->
+        IdentityHelper.extract_user_token(fn url ->
           Identity.deliver_user_reset_password_instructions(user, url)
         end)
 
@@ -466,7 +472,7 @@ defmodule DashFloat.IdentityTest do
 
   describe "reset_user_password/2" do
     setup do
-      %{user: user_fixture()}
+      %{user: insert(:user)}
     end
 
     test "validates password", %{user: user} do

@@ -1,10 +1,11 @@
 defmodule DashFloatWeb.UserAuthTest do
   use DashFloatWeb.ConnCase, async: true
 
+  import DashFloat.Factories.IdentityFactory
+
   alias Phoenix.LiveView
   alias DashFloat.Identity
   alias DashFloatWeb.UserAuth
-  import DashFloat.IdentityFixtures
 
   @remember_me_cookie "_dash_float_web_user_remember_me"
 
@@ -14,7 +15,7 @@ defmodule DashFloatWeb.UserAuthTest do
       |> Map.replace!(:secret_key_base, DashFloatWeb.Endpoint.config(:secret_key_base))
       |> init_test_session(%{})
 
-    %{user: user_fixture(), conn: conn}
+    %{user: insert(:user), conn: conn}
   end
 
   describe "log_in_user/3" do

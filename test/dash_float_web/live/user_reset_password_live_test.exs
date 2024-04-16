@@ -1,16 +1,17 @@
 defmodule DashFloatWeb.UserResetPasswordLiveTest do
   use DashFloatWeb.ConnCase, async: true
 
+  import DashFloat.Factories.IdentityFactory
   import Phoenix.LiveViewTest
-  import DashFloat.IdentityFixtures
 
   alias DashFloat.Identity
+  alias DashFloat.TestHelpers.IdentityHelper
 
   setup do
-    user = user_fixture()
+    user = insert(:user)
 
     token =
-      extract_user_token(fn url ->
+      IdentityHelper.extract_user_token(fn url ->
         Identity.deliver_user_reset_password_instructions(user, url)
       end)
 
