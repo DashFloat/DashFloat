@@ -140,7 +140,7 @@ defmodule DashFloat.Identity.Schemas.User do
   @doc """
   Confirms the account by setting `confirmed_at`.
   """
-  @spec confirm_changeset(user :: User.t()) :: Ecto.Changeset.t()
+  @spec confirm_changeset(user :: User.t() | Ecto.Changeset.t()) :: Ecto.Changeset.t()
   def confirm_changeset(user) do
     now = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)
     change(user, confirmed_at: now)
