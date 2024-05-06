@@ -38,19 +38,6 @@ defmodule DashFloat.IdentityTest do
     end
   end
 
-  describe "get_user!/1" do
-    test "raises if id is invalid" do
-      assert_raise Ecto.NoResultsError, fn ->
-        Identity.get_user!(-1)
-      end
-    end
-
-    test "returns the user with the given id" do
-      %{id: id} = user = insert(:user)
-      assert %User{id: ^id} = Identity.get_user!(user.id)
-    end
-  end
-
   describe "register_user/1" do
     test "requires email and password to be set" do
       {:error, changeset} = Identity.register_user(%{})
@@ -174,7 +161,7 @@ defmodule DashFloat.IdentityTest do
       email = Faker.Internet.email()
       {:ok, user} = Identity.apply_user_email(user, password, %{email: email})
       assert user.email == email
-      assert Identity.get_user!(user.id).email != email
+      assert IdentityHelper.get_user!(user.id).email != email
     end
   end
 

@@ -48,23 +48,6 @@ defmodule DashFloat.Identity do
     if User.valid_password?(user, password), do: user
   end
 
-  @doc """
-  Gets a single user.
-
-  Raises `Ecto.NoResultsError` if the User does not exist.
-
-  ## Examples
-
-      iex> get_user!(123)
-      %User{}
-
-      iex> get_user!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  @spec get_user!(id :: integer()) :: User.t()
-  def get_user!(id), do: Repo.get!(User, id)
-
   ## User registration
 
   @doc """
