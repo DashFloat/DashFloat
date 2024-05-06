@@ -6,7 +6,7 @@ defmodule DashFloat.IdentityTest do
   alias DashFloat.Identity
   alias DashFloat.Identity.Schemas.User
   alias DashFloat.Identity.Schemas.UserToken
-  alias DashFloat.TestHelpers.IdentityHelper
+  alias DashFloat.TestHelpers.IdentityTestHelper
 
   describe "register_user/1" do
     test "requires email and password to be set" do
@@ -131,7 +131,7 @@ defmodule DashFloat.IdentityTest do
       email = Faker.Internet.email()
       {:ok, user} = Identity.apply_user_email(user, password, %{email: email})
       assert user.email == email
-      assert IdentityHelper.get_user!(user.id).email != email
+      assert IdentityTestHelper.get_user!(user.id).email != email
     end
   end
 
@@ -142,7 +142,7 @@ defmodule DashFloat.IdentityTest do
 
     test "sends token through notification", %{user: user} do
       token =
-        IdentityHelper.extract_user_token(fn url ->
+        IdentityTestHelper.extract_user_token(fn url ->
           Identity.deliver_user_update_email_instructions(user, "current@example.com", url)
         end)
 
@@ -160,7 +160,7 @@ defmodule DashFloat.IdentityTest do
       email = Faker.Internet.email()
 
       token =
-        IdentityHelper.extract_user_token(fn url ->
+        IdentityTestHelper.extract_user_token(fn url ->
           Identity.deliver_user_update_email_instructions(%{user | email: email}, user.email, url)
         end)
 
@@ -333,7 +333,7 @@ defmodule DashFloat.IdentityTest do
 
     test "sends token through notification", %{user: user} do
       token =
-        IdentityHelper.extract_user_token(fn url ->
+        IdentityTestHelper.extract_user_token(fn url ->
           Identity.deliver_user_confirmation_instructions(user, url)
         end)
 
@@ -350,7 +350,7 @@ defmodule DashFloat.IdentityTest do
       user = insert(:user)
 
       token =
-        IdentityHelper.extract_user_token(fn url ->
+        IdentityTestHelper.extract_user_token(fn url ->
           Identity.deliver_user_confirmation_instructions(user, url)
         end)
 
@@ -386,7 +386,7 @@ defmodule DashFloat.IdentityTest do
 
     test "sends token through notification", %{user: user} do
       token =
-        IdentityHelper.extract_user_token(fn url ->
+        IdentityTestHelper.extract_user_token(fn url ->
           Identity.deliver_user_reset_password_instructions(user, url)
         end)
 
@@ -403,7 +403,7 @@ defmodule DashFloat.IdentityTest do
       user = insert(:user)
 
       token =
-        IdentityHelper.extract_user_token(fn url ->
+        IdentityTestHelper.extract_user_token(fn url ->
           Identity.deliver_user_reset_password_instructions(user, url)
         end)
 

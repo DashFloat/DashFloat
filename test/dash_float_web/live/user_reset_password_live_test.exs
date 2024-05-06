@@ -5,13 +5,13 @@ defmodule DashFloatWeb.UserResetPasswordLiveTest do
   import Phoenix.LiveViewTest
 
   alias DashFloat.Identity
-  alias DashFloat.TestHelpers.IdentityHelper
+  alias DashFloat.TestHelpers.IdentityTestHelper
 
   setup do
     user = insert(:user)
 
     token =
-      IdentityHelper.extract_user_token(fn url ->
+      IdentityTestHelper.extract_user_token(fn url ->
         Identity.deliver_user_reset_password_instructions(user, url)
       end)
 

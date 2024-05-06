@@ -1,4 +1,4 @@
-defmodule DashFloat.TestHelpers.IdentityHelper do
+defmodule DashFloat.TestHelpers.IdentityTestHelper do
   @moduledoc """
   Test helpers for the `Identity` context
   """ 

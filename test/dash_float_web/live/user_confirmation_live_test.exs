@@ -7,7 +7,7 @@ defmodule DashFloatWeb.UserConfirmationLiveTest do
   alias DashFloat.Identity
   alias DashFloat.Identity.Schemas.UserToken
   alias DashFloat.Repo
-  alias DashFloat.TestHelpers.IdentityHelper
+  alias DashFloat.TestHelpers.IdentityTestHelper
 
   setup do
     %{user: insert(:user)}
@@ -21,7 +21,7 @@ defmodule DashFloatWeb.UserConfirmationLiveTest do
 
     test "confirms the given token once", %{conn: conn, user: user} do
       token =
-        IdentityHelper.extract_user_token(fn url ->
+        IdentityTestHelper.extract_user_token(fn url ->
           Identity.deliver_user_confirmation_instructions(user, url)
         end)
 
@@ -38,7 +38,7 @@ defmodule DashFloatWeb.UserConfirmationLiveTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
                "User confirmed successfully"
 
-      assert IdentityHelper.get_user!(user.id).confirmed_at
+      assert IdentityTestHelper.get_user!(user.id).confirmed_at
       refute get_session(conn, :user_token)
       assert Repo.all(UserToken) == []
 
@@ -85,7 +85,7 @@ defmodule DashFloatWeb.UserConfirmationLiveTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :error) =~
                "User confirmation link is invalid or it has expired"
 
-      refute IdentityHelper.get_user!(user.id).confirmed_at
+      refute IdentityTestHelper.get_user!(user.id).confirmed_at
     end
   end
 end

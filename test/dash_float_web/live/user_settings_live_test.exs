@@ -5,7 +5,7 @@ defmodule DashFloatWeb.UserSettingsLiveTest do
   import Phoenix.LiveViewTest
 
   alias DashFloat.Identity
-  alias DashFloat.TestHelpers.IdentityHelper
+  alias DashFloat.TestHelpers.IdentityTestHelper
 
   describe "Settings page" do
     test "renders settings page", %{conn: conn} do
@@ -166,7 +166,7 @@ defmodule DashFloatWeb.UserSettingsLiveTest do
       email = Faker.Internet.email()
 
       token =
-        IdentityHelper.extract_user_token(fn url ->
+        IdentityTestHelper.extract_user_token(fn url ->
           Identity.deliver_user_update_email_instructions(%{user | email: email}, user.email, url)
         end)
 
