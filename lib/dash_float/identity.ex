@@ -5,6 +5,7 @@ defmodule DashFloat.Identity do
 
   import Ecto.Query, warn: false
 
+  alias DashFloat.Identity.Repositories.UserRepository
   alias DashFloat.Identity.Schemas.User
   alias DashFloat.Identity.Schemas.UserToken
   alias DashFloat.Identity.UserNotifier
@@ -25,9 +26,7 @@ defmodule DashFloat.Identity do
 
   """
   @spec get_user_by_email(email :: String.t()) :: User.t() | nil
-  def get_user_by_email(email) when is_binary(email) do
-    Repo.get_by(User, email: email)
-  end
+  defdelegate get_user_by_email(email), to: UserRepository, as: :get_by_email
 
   @doc """
   Gets a user by email and password.

@@ -8,17 +8,6 @@ defmodule DashFloat.IdentityTest do
   alias DashFloat.Identity.Schemas.UserToken
   alias DashFloat.TestHelpers.IdentityHelper
 
-  describe "get_user_by_email/1" do
-    test "does not return the user if the email does not exist" do
-      refute Identity.get_user_by_email("unknown@example.com")
-    end
-
-    test "returns the user if the email exists" do
-      %{id: id} = user = insert(:user)
-      assert %User{id: ^id} = Identity.get_user_by_email(user.email)
-    end
-  end
-
   describe "get_user_by_email_and_password/2" do
     test "does not return the user if the email does not exist" do
       refute Identity.get_user_by_email_and_password("unknown@example.com", "hello world!")
