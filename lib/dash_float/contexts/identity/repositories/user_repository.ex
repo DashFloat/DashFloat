@@ -43,4 +43,23 @@ defmodule DashFloat.Identity.Repositories.UserRepository do
 
     if User.valid_password?(user, password), do: user
   end
+
+  @doc """
+  Registers a user.
+
+  ## Examples
+
+      iex> register(%{field: value})
+      {:ok, %User{}}
+
+      iex> register(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec register(attrs :: map()) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
+  def register(attrs) do
+    %User{}
+    |> User.registration_changeset(attrs)
+    |> Repo.insert()
+  end
 end

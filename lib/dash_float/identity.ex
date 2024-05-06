@@ -58,11 +58,7 @@ defmodule DashFloat.Identity do
 
   """
   @spec register_user(attrs :: map()) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
-  def register_user(attrs) do
-    %User{}
-    |> User.registration_changeset(attrs)
-    |> Repo.insert()
-  end
+  defdelegate register_user(attrs), to: UserRepository, as: :register
 
   @doc """
   Returns an `%Ecto.Changeset{}` for tracking user changes.
