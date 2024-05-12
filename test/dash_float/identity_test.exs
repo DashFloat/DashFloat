@@ -8,36 +8,6 @@ defmodule DashFloat.IdentityTest do
   alias DashFloat.Identity.Schemas.UserToken
   alias DashFloat.TestHelpers.IdentityTestHelper
 
-  describe "change_user_registration/2" do
-    test "returns a changeset" do
-      assert %Ecto.Changeset{} = changeset = Identity.change_user_registration(%User{})
-      assert changeset.required == [:password, :email]
-    end
-
-    test "allows fields to be set" do
-      email = Faker.Internet.email()
-      password = "valid password"
-
-      changeset =
-        Identity.change_user_registration(
-          %User{},
-          %{email: email, password: password}
-        )
-
-      assert changeset.valid?
-      assert get_change(changeset, :email) == email
-      assert get_change(changeset, :password) == password
-      assert is_nil(get_change(changeset, :hashed_password))
-    end
-  end
-
-  describe "change_user_email/2" do
-    test "returns a user changeset" do
-      assert %Ecto.Changeset{} = changeset = Identity.change_user_email(%User{})
-      assert changeset.required == [:email]
-    end
-  end
-
   describe "apply_user_email/3" do
     setup do
       password = "totally valid password"

@@ -6,6 +6,13 @@ defmodule DashFloat.Identity.Repositories.UserRepositoryTest do
   alias DashFloat.Identity.Repositories.UserRepository
   alias DashFloat.Identity.Schemas.User
 
+  describe "change_user_email/2" do
+    test "returns a user changeset" do
+      assert %Ecto.Changeset{} = changeset = UserRepository.change_email(%User{}, %{})
+      assert changeset.required == [:email]
+    end
+  end
+
   describe "change_registration/2" do
     test "returns a changeset" do
       assert %Ecto.Changeset{} = changeset = UserRepository.change_registration(%User{}, %{})

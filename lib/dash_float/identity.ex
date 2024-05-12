@@ -84,9 +84,7 @@ defmodule DashFloat.Identity do
 
   """
   @spec change_user_email(user :: User.t(), attrs :: map()) :: Ecto.Changeset.t()
-  def change_user_email(user, attrs \\ %{}) do
-    User.email_changeset(user, attrs, validate_email: false)
-  end
+  defdelegate change_user_email(user, attrs \\ %{}), to: UserRepository, as: :change_email
 
   @doc """
   Emulates that the email will change without actually changing
