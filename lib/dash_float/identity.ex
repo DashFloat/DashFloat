@@ -8,6 +8,7 @@ defmodule DashFloat.Identity do
   alias DashFloat.Identity.Repositories.UserRepository
   alias DashFloat.Identity.Schemas.User
   alias DashFloat.Identity.Schemas.UserToken
+  alias DashFloat.Identity.Services.UpdateUserEmail
   alias DashFloat.Identity.UserNotifier
   alias DashFloat.Repo
 
@@ -109,28 +110,7 @@ defmodule DashFloat.Identity do
   The confirmed_at date is also updated to the current time.
   """
   @spec update_user_email(user :: User.t(), token :: binary()) :: :ok | :error
-  def update_user_email(user, token) do
-    context = "change:#{user.email}"
-
-    with {:ok, query} <- UserToken.verify_change_email_token_query(token, context),
-         %UserToken{sent_to: email} <- Repo.one(query),
-         {:ok, _} <- Repo.transaction(user_email_multi(user, email, context)) do
-      :ok
-    else
-      _ -> :error
-    end
-  end
-
-  defp user_email_multi(user, email, context) do
-    changeset =
-      user
-      |> User.email_changeset(%{email: email})
-      |> User.confirm_changeset()
-
-    Ecto.Multi.new()
-    |> Ecto.Multi.update(:user, changeset)
-    |> Ecto.Multi.delete_all(:tokens, UserToken.by_user_and_contexts_query(user, [context]))
-  end
+  defdelegate update_user_email(user, token), to: UpdateUserEmail, as: :call
 
   @doc ~S"""
   Delivers the update email instructions to the given user.
