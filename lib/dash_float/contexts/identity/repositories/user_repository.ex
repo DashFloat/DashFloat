@@ -8,6 +8,27 @@ defmodule DashFloat.Identity.Repositories.UserRepository do
   alias DashFloat.Identity.Schemas.User
 
   @doc """
+  Emulates that the email will change without actually changing
+  it in the database.
+
+  ## Examples
+
+      iex> apply_email(user, "valid password", %{email: ...})
+      {:ok, %User{}}
+
+      iex> apply_email(user, "invalid password", %{email: ...})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec apply_email(user :: User.t(), password :: String.t(), attrs :: map()) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
+  def apply_email(user, password, attrs) do
+    user
+    |> User.email_changeset(attrs)
+    |> User.validate_current_password(password)
+    |> Ecto.Changeset.apply_action(:update)
+  end
+
+  @doc """
   Returns an `%Ecto.Changeset{}` for changing the user email.
 
   ## Examples

@@ -5,8 +5,60 @@ defmodule DashFloat.Identity.Repositories.UserRepositoryTest do
 
   alias DashFloat.Identity.Repositories.UserRepository
   alias DashFloat.Identity.Schemas.User
+  alias DashFloat.TestHelpers.IdentityTestHelper
 
-  describe "change_user_email/2" do
+  describe "apply_email/3" do
+    setup do
+      password = "totally valid password"
+      user = insert(:user, %{password: password})
+      %{user: user, password: password}
+    end
+
+    test "requires email to change", %{user: user, password: password} do
+      {:error, changeset} = UserRepository.apply_email(user, password, %{})
+      assert %{email: ["did not change"]} = errors_on(changeset)
+    end
+
+    test "validates email", %{user: user, password: password} do
+      {:error, changeset} =
+        UserRepository.apply_email(user, password, %{email: "not valid"})
+
+      assert %{email: ["must have the @ sign and no spaces"]} = errors_on(changeset)
+    end
+
+    test "validates maximum value for email for security", %{user: user, password: password} do
+      too_long = String.duplicate("db", 100)
+
+      {:error, changeset} =
+        UserRepository.apply_email(user, password, %{email: too_long})
+
+      assert "should be at most 160 character(s)" in errors_on(changeset).email
+    end
+
+    test "validates email uniqueness", %{user: user, password: password} do
+      %{email: email} = insert(:user)
+
+      {:error, changeset} = UserRepository.apply_email(user, password, %{email: email})
+
+      assert "has already been taken" in errors_on(changeset).email
+    end
+
+    test "validates current password", %{user: user} do
+      {:error, changeset} =
+        UserRepository.apply_email(user, "invalid", %{email: Faker.Internet.email()})
+
+      assert %{current_password: ["is not valid"]} = errors_on(changeset)
+    end
+
+    test "applies the email without persisting it", %{user: user, password: password} do
+      email = Faker.Internet.email()
+      {:ok, user} = UserRepository.apply_email(user, password, %{email: email})
+      assert user.email == email
+      assert IdentityTestHelper.get_user!(user.id).email != email
+    end
+  end
+
+  describe "change_email/2" do
     test "returns a user changeset" do
       assert %Ecto.Changeset{} = changeset = UserRepository.change_email(%User{}, %{})
       assert changeset.required == [:email]

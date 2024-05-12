@@ -100,12 +100,7 @@ defmodule DashFloat.Identity do
 
   """
   @spec apply_user_email(user :: User.t(), password :: String.t(), attrs :: map()) :: {:ok, User.t()} | {:error, Ecto.Changeset.t()}
-  def apply_user_email(user, password, attrs) do
-    user
-    |> User.email_changeset(attrs)
-    |> User.validate_current_password(password)
-    |> Ecto.Changeset.apply_action(:update)
-  end
+  defdelegate apply_user_email(user, password, attrs), to: UserRepository, as: :apply_email
 
   @doc """
   Updates the user email using the given token.

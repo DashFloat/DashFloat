@@ -8,57 +8,6 @@ defmodule DashFloat.IdentityTest do
   alias DashFloat.Identity.Schemas.UserToken
   alias DashFloat.TestHelpers.IdentityTestHelper
 
-  describe "apply_user_email/3" do
-    setup do
-      password = "totally valid password"
-      user = insert(:user, %{password: password})
-      %{user: user, password: password}
-    end
-
-    test "requires email to change", %{user: user, password: password} do
-      {:error, changeset} = Identity.apply_user_email(user, password, %{})
-      assert %{email: ["did not change"]} = errors_on(changeset)
-    end
-
-    test "validates email", %{user: user, password: password} do
-      {:error, changeset} =
-        Identity.apply_user_email(user, password, %{email: "not valid"})
-
-      assert %{email: ["must have the @ sign and no spaces"]} = errors_on(changeset)
-    end
-
-    test "validates maximum value for email for security", %{user: user, password: password} do
-      too_long = String.duplicate("db", 100)
-
-      {:error, changeset} =
-        Identity.apply_user_email(user, password, %{email: too_long})
-
-      assert "should be at most 160 character(s)" in errors_on(changeset).email
-    end
-
-    test "validates email uniqueness", %{user: user, password: password} do
-      %{email: email} = insert(:user)
-
-      {:error, changeset} = Identity.apply_user_email(user, password, %{email: email})
-
-      assert "has already been taken" in errors_on(changeset).email
-    end
-
-    test "validates current password", %{user: user} do
-      {:error, changeset} =
-        Identity.apply_user_email(user, "invalid", %{email: Faker.Internet.email()})
-
-      assert %{current_password: ["is not valid"]} = errors_on(changeset)
-    end
-
-    test "applies the email without persisting it", %{user: user, password: password} do
-      email = Faker.Internet.email()
-      {:ok, user} = Identity.apply_user_email(user, password, %{email: email})
-      assert user.email == email
-      assert IdentityTestHelper.get_user!(user.id).email != email
-    end
-  end
-
   describe "deliver_user_update_email_instructions/3" do
     setup do
       %{user: insert(:user)}
