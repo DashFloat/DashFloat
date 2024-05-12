@@ -6,6 +6,29 @@ defmodule DashFloat.Identity.Repositories.UserRepositoryTest do
   alias DashFloat.Identity.Repositories.UserRepository
   alias DashFloat.Identity.Schemas.User
 
+  describe "change_registration/2" do
+    test "returns a changeset" do
+      assert %Ecto.Changeset{} = changeset = UserRepository.change_registration(%User{}, %{})
+      assert changeset.required == [:password, :email]
+    end
+
+    test "allows fields to be set" do
+      email = Faker.Internet.email()
+      password = "valid password"
+
+      changeset =
+        UserRepository.change_registration(
+          %User{},
+          %{email: email, password: password}
+        )
+
+      assert changeset.valid?
+      assert get_change(changeset, :email) == email
+      assert get_change(changeset, :password) == password
+      assert is_nil(get_change(changeset, :hashed_password))
+    end
+  end
+
   describe "get_by_email/1" do
     test "with non-existing email returns nil" do
       assert UserRepository.get_by_email("unknown@example.com") == nil

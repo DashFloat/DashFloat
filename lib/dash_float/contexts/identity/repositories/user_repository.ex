@@ -8,6 +8,20 @@ defmodule DashFloat.Identity.Repositories.UserRepository do
   alias DashFloat.Identity.Schemas.User
 
   @doc """
+  Returns an `%Ecto.Changeset{}` for tracking user changes.
+
+  ## Examples
+
+      iex> change_registration(user)
+      %Ecto.Changeset{data: %User{}}
+
+  """
+  @spec change_registration(user :: User.t(), attrs :: map()) :: Ecto.Changeset.t()
+  def change_registration(%User{} = user, attrs) do
+    User.registration_changeset(user, attrs, hash_password: false, validate_email: false)
+  end
+
+  @doc """
   Gets a user by email.
 
   ## Examples

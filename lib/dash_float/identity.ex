@@ -70,9 +70,7 @@ defmodule DashFloat.Identity do
 
   """
   @spec change_user_registration(user :: User.t(), attrs :: map()) :: Ecto.Changeset.t()
-  def change_user_registration(%User{} = user, attrs \\ %{}) do
-    User.registration_changeset(user, attrs, hash_password: false, validate_email: false)
-  end
+  defdelegate change_user_registration(user, attrs \\ %{}), to: UserRepository, as: :change_registration
 
   ## Settings
 
